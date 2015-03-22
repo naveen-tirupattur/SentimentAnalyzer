@@ -35,11 +35,16 @@ public class SentimentAnalyzerApplication {
 		Map<String, Pair<String,String>> dataMap = TextUtils.getDataMap("/labeledTrainData.tsv");
 		System.out.println("Dataset size: "+dataMap.size());
 		int count = 0;
+		String first = "", second = "";
 		for(Pair p: dataMap.values() ) {
+			first = p.getFirst().toString();
+			second = p.getSecond().toString();
 			if(count%1000 == 0) System.out.println("Processed "+count+" records");
-			double[] vector = GetVector.createVector(p.getSecond().toString(), wordVector, numOfFeatures);
-			trainingData.add(new Pair(p.getFirst().toString(),Arrays.toString(vector)));
+			double[] vector = GetVector.createVector(second, wordVector, numOfFeatures);
+			trainingData.add(new Pair(first,Arrays.toString(vector)));
 			count++;
+			first = null;
+			second = null;
 		}
 
 		TextUtils.writeFile("trainingData.csv", trainingData);

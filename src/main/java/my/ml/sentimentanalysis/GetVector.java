@@ -22,35 +22,43 @@ public class GetVector {
 	public static double[] createVector(String text, Word2Vec wordVector, int numOfFeatures) {
 
 		List<double[]> wordList = new ArrayList<double[]>();
-
+		
+		StringBuffer cleanedText = new StringBuffer();
+		
 		//Remove special characters
-		String cleanedText = new InputHomogenization(text).transform();
-
-		if(cleanedText == null)
-			System.out.println(text);
-
+		cleanedText.append(new InputHomogenization(text).transform());
+		
 		Collection<String> sentences = new ArrayList<String>();
-		Reader reader = new StringReader(cleanedText);
+		Reader reader = new StringReader(cleanedText.toString());
 		DocumentPreprocessor sentencesList = new DocumentPreprocessor(reader, DocType.Plain);
 		for(List sentence:sentencesList) {
 			sentences.add(TextUtils.removeTags(sentence));
 		}
 		
-		cleanedText = StringUtils.join(sentences.toArray());
+		//Clear the StringBuffer
+		cleanedText.setLength(0);
 		
+		cleanedText.append(StringUtils.join(sentences.toArray()));
+		
+		sentences = null;
 		//Tokenize the sentence and remove stop words
 		TokenizerFactory tokenizerFactory = TextUtils.getTokenizerFactory(true);
-		if(cleanedText == null || cleanedText.isEmpty()) return null;
-		Tokenizer tokenizer =  tokenizerFactory.create(cleanedText);
+		if(cleanedText == null || cleanedText.length()==0) return null;
+		Tokenizer tokenizer =  tokenizerFactory.create(cleanedText.toString());
 		List<String> tokens = tokenizer.getTokens();
-
+		
+		//Clear the StringBuffer
+		cleanedText.setLength(0);
+		
 		int wordCount = 0;
 		//Iterate over each token and get the vector of each token from word2vec
-		for(String token: tokens) {
+		for(int i =0;i<tokens.size();i++) {
+			String token = tokens.get(i);
 			if(wordVector.hasWord(token)) {
 				wordList.add(wordVector.getWordVector(token));
 				wordCount++;
 			}
+			token = null;
 		}
 
 		double[] wordArray = wordList.get(0);
