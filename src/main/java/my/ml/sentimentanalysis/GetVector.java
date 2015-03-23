@@ -70,7 +70,8 @@ public class GetVector {
 		for(int i=0;i<wordArray.length;i++) {
 			normalizedArray[i] = wordArray[i]/wordCount;
 		}
-		
+		wordArray = null;
+		wordList = null;
 		return normalizedArray;
 	}
 

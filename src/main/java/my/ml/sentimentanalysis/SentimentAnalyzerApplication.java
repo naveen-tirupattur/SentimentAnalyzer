@@ -48,6 +48,7 @@ public class SentimentAnalyzerApplication {
 				first = null;
 				second = null;
 				trainingData.add(new Pair(first,vector));
+				vector = null;
 				count++;
 				
 			}
