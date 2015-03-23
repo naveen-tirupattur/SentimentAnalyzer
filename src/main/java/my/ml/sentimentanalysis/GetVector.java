@@ -23,32 +23,27 @@ public class GetVector {
 
 		List<double[]> wordList = new ArrayList<double[]>();
 		
-		StringBuffer cleanedText = new StringBuffer();
-		
-		//Remove special characters
-		cleanedText.append(new InputHomogenization(text).transform());
+		String temp = new InputHomogenization(text).transform();
 		
 		Collection<String> sentences = new ArrayList<String>();
-		Reader reader = new StringReader(cleanedText.toString());
+		Reader reader = new StringReader(temp);
+		temp = null;
 		DocumentPreprocessor sentencesList = new DocumentPreprocessor(reader, DocType.Plain);
 		for(List sentence:sentencesList) {
-			sentences.add(TextUtils.removeTags(sentence));
+			temp = TextUtils.removeTags(sentence);
+			sentences.add(temp);
+			temp = null;
 		}
 		
-		//Clear the StringBuffer
-		cleanedText.setLength(0);
-		
-		cleanedText.append(StringUtils.join(sentences.toArray()));
-		
+		temp = StringUtils.join(sentences.toArray());
 		sentences = null;
+		
 		//Tokenize the sentence and remove stop words
 		TokenizerFactory tokenizerFactory = TextUtils.getTokenizerFactory(true);
-		if(cleanedText == null || cleanedText.length()==0) return null;
-		Tokenizer tokenizer =  tokenizerFactory.create(cleanedText.toString());
+		if(temp == null || temp.length()==0) return null;
+		Tokenizer tokenizer =  tokenizerFactory.create(temp);
 		List<String> tokens = tokenizer.getTokens();
-		
-		//Clear the StringBuffer
-		cleanedText.setLength(0);
+		temp = null;
 		
 		int wordCount = 0;
 		//Iterate over each token and get the vector of each token from word2vec
@@ -60,6 +55,7 @@ public class GetVector {
 			}
 			token = null;
 		}
+		tokens = null;
 
 		double[] wordArray = wordList.get(0);
 		for(int i=1;i<wordList.size();i++)

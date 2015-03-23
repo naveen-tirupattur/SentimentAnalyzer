@@ -1,6 +1,7 @@
 package my.ml.sentimentanalysis;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class TextUtils {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static void writeFile(String fileName, final List<Pair<String,String>> data) {
+	public static void writeFile(String fileName, final List<Pair<String,double[]>> data) {
 		//define the file schema
 		CSV csv = CSV.separator(',')
 				.ignoreLeadingWhiteSpace().create();
@@ -50,7 +51,9 @@ public class TextUtils {
 					if(p.getFirst() == null || p.getSecond() == null) {
 						System.out.println(p.getFirst());
 					}
-					out.writeNext(p.getFirst().toString()+","+p.getSecond().toString());
+					String temp = Arrays.toString((double[])p.getSecond());
+					out.writeNext(p.getFirst().toString()+","+temp);
+					temp = null;
 				}
 			}
 		});
@@ -64,7 +67,7 @@ public class TextUtils {
 				.ignoreLeadingWhiteSpace().skipLines(1).create();
 		try {
 			//read the file
-			csv.read(resource.getInputStream(), new CSVReadProc() {
+			csv.readAndClose(resource.getInputStream(), new CSVReadProc() {
 				@Override
 				public void procRow(int rowIndex, String... values) {
 					//Read the reviews and labels into a map
