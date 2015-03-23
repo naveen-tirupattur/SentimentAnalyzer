@@ -45,10 +45,11 @@ public class SentimentAnalyzerApplication {
 				second = p.getSecond().toString();
 				if(count%1000 == 0) System.out.println("Processed "+count+" records");
 				double[] vector = GetVector.createVector(second, wordVector, numOfFeatures);
-				trainingData.add(new Pair(first,Arrays.toString(vector)));
-				count++;
 				first = null;
 				second = null;
+				trainingData.add(new Pair(first,vector));
+				count++;
+				
 			}
 
 			TextUtils.writeFile("trainingData.csv", trainingData);

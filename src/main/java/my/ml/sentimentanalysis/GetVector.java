@@ -50,7 +50,9 @@ public class GetVector {
 		for(int i =0;i<tokens.size();i++) {
 			String token = tokens.get(i);
 			if(wordVector.hasWord(token)) {
-				wordList.add(wordVector.getWordVector(token));
+				double[] wordWeights = wordVector.getWordVector(token);
+				wordList.add(wordWeights);
+				wordWeights = null;
 				wordCount++;
 			}
 			token = null;

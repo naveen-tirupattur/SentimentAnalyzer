@@ -51,7 +51,9 @@ public class TextUtils {
 					if(p.getFirst() == null || p.getSecond() == null) {
 						System.out.println(p.getFirst());
 					}
-					String temp = Arrays.toString((double[])p.getSecond());
+					double[] weights = (double[])p.getSecond();
+					String temp = Arrays.toString(weights);
+					weights = null;
 					out.writeNext(p.getFirst().toString()+","+temp);
 					temp = null;
 				}
