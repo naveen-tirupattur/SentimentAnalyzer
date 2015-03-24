@@ -1,10 +1,6 @@
 package my.ml.sentimentanalysis;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.deeplearning4j.berkeley.Pair;
@@ -25,8 +21,6 @@ public class SentimentAnalyzerApplication {
 		//generate the wordvector from the data
 		//GenerateWordVector.createWordVector("/labeledTrainData.tsv",numOfFeatures);
 
-		List<Pair<String,double[]>> trainingData = new ArrayList<Pair<String,double[]>>();
-
 		//read the wordvector
 		ClassPathResource resource = new ClassPathResource("/wordVectorWithStopWords");
 		Word2Vec wordVector;
@@ -41,19 +35,19 @@ public class SentimentAnalyzerApplication {
 			int count = 0;
 			String first = "", second = "";
 			for(Pair p: dataMap.values() ) {
+				
 				first = p.getFirst().toString();
 				second = p.getSecond().toString();
 				if(count%1000 == 0) System.out.println("Processed "+count+" records");
 				double[] vector = GetVector.createVector(second, wordVector, numOfFeatures);
+				Pair pair = new Pair(first,vector);
 				first = null;
 				second = null;
-				trainingData.add(new Pair(first,vector));
+				TextUtils.writeFile("trainingData.csv", pair);
+				pair = null;
 				vector = null;
 				count++;
-				
-			}
-
-			TextUtils.writeFile("trainingData.csv", trainingData);
+			}			
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

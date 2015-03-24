@@ -64,15 +64,12 @@ public class GetVector {
 		{
 			wordArray = ArrayUtils.addAll(wordArray, wordList.get(i));
 		}
-		
-		
-		double[] normalizedArray = new double[wordArray.length];
-		for(int i=0;i<wordArray.length;i++) {
-			normalizedArray[i] = wordArray[i]/wordCount;
-		}
-		wordArray = null;
 		wordList = null;
-		return normalizedArray;
+		for(int i=0;i<wordArray.length;i++) {
+			wordArray[i] = wordArray[i]/wordCount;
+		}
+		
+		return wordArray;
 	}
 
 }

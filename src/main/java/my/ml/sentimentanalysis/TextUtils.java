@@ -27,9 +27,9 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.StripTagsProcessor;
 
 public class TextUtils {
-	
+
 	private static Log log = LogFactory.getLog(TextUtils.class);
-	
+
 	// define the map to store the labels and reviews
 	private static final Map<String, Pair<String,String>> dataMap = new HashMap<String,Pair<String, String>>();
 
@@ -37,26 +37,25 @@ public class TextUtils {
 		if(dataMap.isEmpty()) readFile(fileName);
 		return dataMap;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public static void writeFile(String fileName, final List<Pair<String,double[]>> data) {
+
+	public static void writeFile(String fileName, final Pair<String,double[]> data) {
 		//define the file schema
 		CSV csv = CSV.separator(',')
 				.ignoreLeadingWhiteSpace().create();
-		
+
 		// write CSV file
 		csv.write(fileName, new CSVWriteProc() {
 			public void process(CSVWriter out) {
-				for(Pair p:data) {
-					if(p.getFirst() == null || p.getSecond() == null) {
-						System.out.println(p.getFirst());
-					}
-					double[] weights = (double[])p.getSecond();
-					String temp = Arrays.toString(weights);
-					weights = null;
-					out.writeNext(p.getFirst().toString()+","+temp);
-					temp = null;
+
+				if(data.getFirst() == null || data.getSecond() == null) {
+					System.out.println(data.getFirst());
 				}
+				double[] weights = (double[])data.getSecond();
+				String temp = Arrays.toString(weights);
+				weights = null;
+				out.writeNext(data.getFirst().toString()+","+temp);
+				temp = null;
+
 			}
 		});
 	}
@@ -81,7 +80,7 @@ public class TextUtils {
 
 		}
 	}
-	
+
 	public static TokenizerFactory getTokenizerFactory(final boolean removeStopWords) {
 		TokenizerFactory t;
 		try {
@@ -106,7 +105,7 @@ public class TextUtils {
 		}
 		return null;
 	}
-	
+
 	public static String removeTags(List<Word> text) {
 		StripTagsProcessor<Word , Word> stripTags = new StripTagsProcessor<>();
 		//Remove HTML tags
