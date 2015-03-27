@@ -3,15 +3,16 @@ package my.ml.sentimentanalysis;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.text.inputsanitation.InputHomogenization;
 import org.deeplearning4j.text.tokenization.tokenizer.Tokenizer;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
@@ -19,57 +20,47 @@ import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
 public class GetVector {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static double[] createVector(String text, Word2Vec wordVector, int numOfFeatures) {
+	public static INDArray createVector(String key, String documentText, Word2Vec wordVector, int numOfFeatures) {
 
-		List<double[]> wordList = new ArrayList<double[]>();
 		
-		String temp = new InputHomogenization(text).transform();
+		String temp = new InputHomogenization(documentText).transform();
 		
 		Collection<String> sentences = new ArrayList<String>();
 		Reader reader = new StringReader(temp);
-		temp = null;
 		DocumentPreprocessor sentencesList = new DocumentPreprocessor(reader, DocType.Plain);
 		for(List sentence:sentencesList) {
 			temp = TextUtils.removeTags(sentence);
 			sentences.add(temp);
-			temp = null;
 		}
 		
-		temp = StringUtils.join(sentences.toArray());
+		String cleanedText = StringUtils.join(sentences.toArray());
 		sentences = null;
 		
 		//Tokenize the sentence and remove stop words
 		TokenizerFactory tokenizerFactory = TextUtils.getTokenizerFactory(true);
-		if(temp == null || temp.length()==0) return null;
-		Tokenizer tokenizer =  tokenizerFactory.create(temp);
+		if(cleanedText == null || cleanedText.length()==0) return null;
+		Tokenizer tokenizer =  tokenizerFactory.create(cleanedText);
 		List<String> tokens = tokenizer.getTokens();
-		temp = null;
 		
 		int wordCount = 0;
+		INDArray wordWeights = wordVector.getWordVectorMatrix(tokens.get(0));
+		
 		//Iterate over each token and get the vector of each token from word2vec
-		for(int i =0;i<tokens.size();i++) {
+		for(int i =1;i<tokens.size();i++) {
 			String token = tokens.get(i);
 			if(wordVector.hasWord(token)) {
-				double[] wordWeights = wordVector.getWordVector(token);
-				wordList.add(wordWeights);
-				wordWeights = null;
+				wordWeights.addi(wordVector.getWordVectorMatrix(token));
 				wordCount++;
 			}
 			token = null;
 		}
 		tokens = null;
-
-		double[] wordArray = wordList.get(0);
-		for(int i=1;i<wordList.size();i++)
-		{
-			wordArray = ArrayUtils.addAll(wordArray, wordList.get(i));
+		INDArray normalizedWordWeights = wordWeights.divi(Integer.valueOf(wordCount));
+		if(Arrays.toString(normalizedWordWeights.ravel().data().asFloat()).contains("Infinity")) {
+			System.out.println(cleanedText);
 		}
-		wordList = null;
-		for(int i=0;i<wordArray.length;i++) {
-			wordArray[i] = wordArray[i]/wordCount;
-		}
+		return normalizedWordWeights;
 		
-		return wordArray;
 	}
 
 }

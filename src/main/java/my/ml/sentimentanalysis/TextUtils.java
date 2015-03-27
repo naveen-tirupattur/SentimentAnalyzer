@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,6 +18,7 @@ import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.EndingPreProc
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.StringCleaning;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.UimaTokenizerFactory;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.springframework.core.io.ClassPathResource;
 
 import au.com.bytecode.opencsv.CSV;
@@ -29,7 +32,7 @@ import edu.stanford.nlp.process.StripTagsProcessor;
 public class TextUtils {
 
 	private static Log log = LogFactory.getLog(TextUtils.class);
-
+	
 	// define the map to store the labels and reviews
 	private static final Map<String, Pair<String,String>> dataMap = new HashMap<String,Pair<String, String>>();
 
@@ -38,7 +41,7 @@ public class TextUtils {
 		return dataMap;
 	}
 
-	public static void writeFile(String fileName, final Pair<String,double[]> data) {
+	public static void writeFile(String fileName, final List<Pair> data) {
 		//define the file schema
 		CSV csv = CSV.separator(',')
 				.ignoreLeadingWhiteSpace().create();
@@ -46,16 +49,12 @@ public class TextUtils {
 		// write CSV file
 		csv.write(fileName, new CSVWriteProc() {
 			public void process(CSVWriter out) {
-
-				if(data.getFirst() == null || data.getSecond() == null) {
-					System.out.println(data.getFirst());
-				}
-				double[] weights = (double[])data.getSecond();
-				String temp = Arrays.toString(weights);
-				weights = null;
-				out.writeNext(data.getFirst().toString()+","+temp);
+				for(Pair p:data) {
+				INDArray weights = (INDArray) p.getSecond();
+				String temp = Arrays.toString(weights.ravel().data().asFloat());
+				out.writeNext(p.getFirst().toString()+","+temp);
 				temp = null;
-
+				}
 			}
 		});
 	}
@@ -71,7 +70,6 @@ public class TextUtils {
 			csv.readAndClose(resource.getInputStream(), new CSVReadProc() {
 				@Override
 				public void procRow(int rowIndex, String... values) {
-					//Read the reviews and labels into a map
 					dataMap.put(values[0], new Pair(values[1],values[2].toLowerCase())); 
 				}
 			});
